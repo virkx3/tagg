@@ -1,21 +1,21 @@
 #!/bin/bash
 
-# Update and install tools
-apt-get update && apt-get install -y wget unzip curl
+# Install dependencies
+apt update && apt install -y wget unzip python3-pip
 
-# Install Google Chrome
+# Install Chrome (headless)
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-apt install -y ./google-chrome-stable_current_amd64.deb
+apt install -y ./google-chrome-stable_current_amd64.deb || true
 
-# Get exact Chrome version
-CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+# Get latest ChromeDriver version
+CHROME_VERSION=$(google-chrome --version | grep -oP '[0-9.]+' | head -1 | cut -d. -f1)
+DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
 
-# Get matching ChromeDriver
-CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+# Download correct ChromeDriver
+wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
 unzip chromedriver_linux64.zip
+chmod +x chromedriver
 mv chromedriver /usr/bin/chromedriver
-chmod +x /usr/bin/chromedriver
 
 # Run your bot
 python3 main.py
